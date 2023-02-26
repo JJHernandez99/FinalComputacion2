@@ -1,20 +1,29 @@
 import socket
 import os
+import threading
+import sys
 
-# codigo para hacer codificacion
 from datetime import datetime
 
 key = 99
 
-
+# funcion para convertir fechas en numeros y guardarlos depuses
 def to_integer(dt_time):
     return 10000*dt_time.year + 100*dt_time.month + dt_time.day
 
-
-def decode_image(name):
+# funcion para obtener archivos
+def get_files():
+    print('List files: ')
     dirpath = os.getcwd()
-    path = dirpath + '/' + name + '.enc'
-    path_result = dirpath + '/' + 'result-' + to_integer(datetime.datetime.utcnow().timestamp()) + name
+    path = dirpath + '/files'
+    dir_list = os.listdir(path)
+    return dir_list
+
+# funcion para decodificar archivos
+def decode_image(name, conn):
+    dirpath = os.getcwd()
+    path = dirpath + '/files/' + name + '.enc'
+    path_result = dirpath + '/' + 'result-' + str(to_integer(datetime.utcnow())) + name
     # print path of image file and decryption key that we are using
     print('The path of file : ', path)
     print('Note : Encryption key and Decryption key must be same.')
@@ -41,12 +50,23 @@ def decode_image(name):
     fin.write(image)
     fin.close()
     print('Decryption Done...')
-    return path_result
+    msg = "SIZE FILE " + str(len(image)) + " " + name
+    conn.send(msg.encode())
+    # wait if get image size to send image
+    # wait confirmation
+    answer = conn.recv(1024).decode()
+    print('answer = ' + answer)
+    if answer == 'GOT CONFIRMATION':
+        # send image
+        conn.send(image)
+
+    return True
 
 
-def encode_image(data, name):
+# funcion para codificar archivos
+def encode_file(data, name):
     dirpath = os.getcwd()
-    path_result = dirpath + '/' + name + '.enc'
+    path_result = dirpath + '/files/' + name + '.enc'
     image = bytearray(data)
 
     # performing XOR operation on each value of bytearray
@@ -61,14 +81,14 @@ def encode_image(data, name):
     fin.close()
     print('Encryption Done...')
 
-
+# programa principal
 def server_program():
     buffer_size = 4096
     wait_for_image = False
     basename = ""
     # get the hostname
     host = socket.gethostname()
-    port = 5000  # initiate port no above 1024
+    port = int(sys.argv[1]) if len(sys.argv) > 0 else 5000  # se setea el puerto desde argumento o por defecto
     print("init server")
     server_socket = socket.socket()  # get instance
     # look closely. The bind() function takes tuple as argument
@@ -78,25 +98,48 @@ def server_program():
     server_socket.listen(2)
     conn, address = server_socket.accept()  # accept new connection
     print("Connection from: " + str(address))
+    # loop principal
     while True:
+        print("inicia loop")
         # receive data stream. it won't accept data packet greater than 1024 bytes
         if wait_for_image:
             print("esperando por la imagen")
             data = conn.recv(buffer_size)
             if data:
                 print("imagen obtenida: " + str(data))
-                # encriptar imagen
-                encode_image(data, basename)
+                # encriptar archivo
+                encode_file(data, basename)
                 wait_for_image = False
                 msg = "Imagen get it"
+                # enviar mensaje de imagen enviada
                 conn.send(msg.encode())
+                continue
                 # conn.close()
-                break
+                # break
 
         data = conn.recv(1024).decode()
-        if data.startswith("get image"):
-            print("Need get image")
+        # deteccion de comandos
+        if data.startswith("get files"):
+            dir_list = get_files()
+            print(dir_list)
+            msg = "List Files: " + str(dir_list)
+            conn.send(msg.encode())
+            continue
+        # deteccion de archivo recibido
+        if data.startswith("-FILE GET IT-"):
+            conn.send("all good".encode())
+            continue
+        # deteccion de solicitud de archivo
+        if data.startswith("get file"):
+            tmp = data.split()
+            name = tmp[2]
+            print("name retrive: " + name)
+            # decode_image(name, conn)
+            x = threading.Thread(target=decode_image, args=(name, conn), daemon=True)
+            x.start()
+            continue
 
+        # detectccion de obtener archivo
         if data.startswith("SIZE"):
             tmp = data.split()
             size = int(tmp[1])
@@ -115,8 +158,10 @@ def server_program():
             # if data is not received break
             break
         print("from connected user: " + str(data))
-        data = input(' -> ')
-        conn.send(data.encode())  # send data to the client
+
+        # data = input(' -> ')
+        # conn.send(data.encode())  # send data to the client
+        conn.send("no command".encode())
     print("termino")
     conn.close()  # close the connection
 
