@@ -18,8 +18,8 @@ El servidor solicita el nombre de usuario cuando el usuario desea unirse a la sa
 
 ### Principal
 
-![](https://github.com/JJHernandez99/FinalComputacion2/doc/Diagram-Principal.png)
+![Diagram-Principal](https://user-images.githubusercontent.com/48955519/222277237-5d543260-c96c-45e7-af59-87ad9468da6d.png)
 
 ### Manejo de Sockets
 
-![](https://github.com/JJHernandez99/FinalComputacion2/doc/Diagram-Sockets.png)
+![Diagram-Sockets](https://user-images.githubusercontent.com/48955519/222277392-66e0f48e-f2b0-4550-86ba-3efcc2ceb5a4.png)
