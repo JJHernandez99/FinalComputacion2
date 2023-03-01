@@ -7,13 +7,19 @@ El servidor es el encargado de atender cada uno de clientes que se conectan para
 
 El servidor solicita el nombre de usuario cuando el usuario desea unirse a la sala de chat y acepta la conexión solo si el nombre de usuario es único. Luego transmite el mensaje de un cliente a todos los demás clientes conectados. También informa sobre la entrada/salida de cualquier cliente.
 
-## Elementos Principalese
+## Elementos Principales
 - Uso de Sockets con multiples conexiones de clientes de manera concurrente.
 - Mecanismos de IPC 
 - Parseo de argumentos por linea de comando
 - Entorno Visual (Desktop)
 - Despliegue en contenedores Docker
 
-## Diagrama Principal
+## Diagramas
 
-![](https://ibb.co/M8cD4qw)
+### Principal
+
+![](https://github.com/JJHernandez99/FinalComputacion2/doc/Diagram-Principal.png)
+
+### Manejo de Sockets
+
+![](https://github.com/JJHernandez99/FinalComputacion2/doc/Diagram-Sockets.png)

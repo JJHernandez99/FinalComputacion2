@@ -1,49 +1,58 @@
 import socket, threading
+from argumentos import parser
+import threading
+import socket
 
-def accept_client():
-    while True:
-        #accept    
-        cli_sock, cli_add = ser_sock.accept()
-        uname = cli_sock.recv(1024)
-        CONNECTION_LIST.append((uname, cli_sock))
-        print('%s is now connected' %uname)
-        thread_client = threading.Thread(target = broadcast_usr, args=[uname, cli_sock])
-        thread_client.start()
+args=parser()
+host = '127.0.0.1'
+port = args.port
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind((host, port))
+server.listen()
+clients = []
+users = []
 
-def broadcast_usr(uname, cli_sock):
+#Manejo de mensajes
+def broadcast(message):
+    for client in clients:
+        client.send(message)
+
+#Manejo de conexiones de los clientes
+def handle_client(client):
     while True:
         try:
-            data = cli_sock.recv(1024)
-            if data:
-                print((uname))
-                b_usr(cli_sock, uname, data)
-        except Exception as x:
-            print(x.message)
+            message = client.recv(1024)
+            broadcast(message)
+        except:
+            index = clients.index(client)
+            clients.remove(client)
+            client.close()
+            name = users[index]
+            
+            broadcast(f'{name} ha salido del chat!'.encode('utf-8'))
+            users.remove(name)
             break
 
-def b_usr(cs_sock, sen_name, msg):
-    for client in CONNECTION_LIST:
-        if client[1] != cs_sock:
-            client[1].send(sen_name)
-            client[1].send(msg)
+#Funcion para aceptar las conexiones de los clients
+def accept_clients():
+    print('SERVER')
+    while True:
+        
+        client, address = server.accept()
+        print(f'Conexion establecida por: {str(address)}')
+        client.send('Nombre de usuario'.encode('utf-8'))
+        name = client.recv(1024)
+        users.append(name)
+        clients.append(client)
+        print(f'Nombre de usuario: {name}'.encode('utf-8'))
+        
+        broadcast(f'{name} se conecto al chat'.encode('utf-8'))
+        client.send('Estas conectado!'.encode('utf-8'))
+        
+        
+        thread = threading.Thread(target=handle_client, args=(client,))
+        thread.start()
 
-if __name__ == "__main__":    
-    CONNECTION_LIST = []
 
-    # socket
-    ser_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # bind
-    HOST = 'localhost'
-    PORT = 5003
-    ser_sock.bind((HOST, PORT))
-
-    # listen    
-    ser_sock.listen(1)
-    print('Chat server started on port : ' + str(PORT))
-
-    thread_ac = threading.Thread(target = accept_client)
-    thread_ac.start()
-
-    #thread_bs = threading.Thread(target = broadcast_usr)
-    #thread_bs.start()
+if __name__ == "__main__":
+    accept_clients()

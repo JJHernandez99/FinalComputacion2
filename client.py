@@ -1,31 +1,37 @@
 import socket, threading
+from argumentos import parser
+import threading
+import socket
 
-def send():
+args=parser()
+port=args.port
+name = args.name
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(('127.0.0.1', port))
+
+
+def client_receive():
     while True:
-        msg = input('\nMe > ').encode()
-        cli_sock.send(msg)
+        try:
+            message = client.recv(1024).decode('utf-8')
+            if message == "Nombre de usuario":
+                client.send(name.encode('utf-8'))
+            else:
+                print(message)
+        except:
+            print('Error!')
+            client.close()
+            break
 
-def receive():
+
+def client_send():
     while True:
-        sen_name = cli_sock.recv(1024)
-        data = cli_sock.recv(1024)
+        message = f'{name}: {input("->")}'
+        client.send(message.encode('utf-8'))
 
-        print('\n' + str(sen_name) + ' > ' + str(data))
 
-if __name__ == "__main__":   
-    # socket
-    cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+receive_thread = threading.Thread(target=client_receive)
+receive_thread.start()
 
-    # connect
-    HOST = 'localhost'
-    PORT = 5003
-    cli_sock.connect((HOST, PORT))     
-    print('Connected to remote host...')
-    uname = input('Enter your name to enter the chat > ').encode()
-    cli_sock.send((uname))
-
-    thread_send = threading.Thread(target = send)
-    thread_send.start()
-
-    thread_receive = threading.Thread(target = receive)
-    thread_receive.start()
+send_thread = threading.Thread(target=client_send)
+send_thread.start()
