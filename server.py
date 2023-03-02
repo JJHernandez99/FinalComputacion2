@@ -11,6 +11,7 @@ clients_name = " "
 clients = []
 users = []
 
+#FRONT-END SERVER
 #Ventana servidor
 screen_servidor = tkinter.Tk()
 screen_servidor.title("Server")
@@ -42,7 +43,6 @@ clientFrame.pack(side=tkinter.BOTTOM, pady=(10, 20))
 
 #Funcion para arrancar el servidor
 def start_server():
-    global server, host, port # code is fine without this
     button_connect.config(state=tkinter.DISABLED)
     button_stop.config(state=tkinter.NORMAL)
 
@@ -51,7 +51,7 @@ def start_server():
     print(socket.SOCK_STREAM)
 
     server.bind((host, port))
-    server.listen()  # server is listening for client connection
+    server.listen()
 
     #threading._start_new_thread(accept_clients, (server, " "))  
     thread = threading.Thread(target=accept_clients, args=(server," "))
@@ -106,18 +106,18 @@ def handle_client(client_connection, addr):
             save_file(file_buffer, file_data[2])
             data = client_connection.recv(4096).decode()
             print(file_buffer)
-            client_connection.send("Archivo recibido".encode())
+            client_connection.send("Archivo enviado".encode())
 
         index = get_client(clients, client_connection)
         sending_client_name = users[index]
 
         for i in clients:
             if i != client_connection:
-                server_msg = str(sending_client_name + "->" + client_msg)
+                server_msg = str(sending_client_name + "-> " + client_msg)
                 i.send(server_msg.encode())
 
-    index = get_client(clients, client_connection) 
-    del users[index] #Elimino el cliente del server 
+    index = get_client(clients, client_connection)
+    del users[index] #Elimino el cliente del server
     del clients[index] #Elimino el cliente de la conexcion
     server_msg = "BYE!"
     client_connection.send(server_msg.encode())
@@ -146,7 +146,7 @@ def update_list(list_users):
 #Agrego a la carpeta files los archivos enviados por los clientes
 def save_file(data, name):
     data_b = bytearray(data)
-    path_result = os.getcwd() + "/files/" + name 
+    path_result = os.getcwd() + "/files/" + name
     f = open(path_result, 'wb')
     f.write(data_b)
     f.close()

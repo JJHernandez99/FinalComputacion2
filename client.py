@@ -79,9 +79,9 @@ def client_send(message):
     # habilitar pantalla de visualización e insertar el texto y luego deshabilitar.
     chat.config(state=tkinter.NORMAL)
     if len(texts) < 1:
-        chat.insert(tkinter.END, "->"+ " " + message, "mensaje") # no line
+        chat.insert(tkinter.END, "-> "+ " " + message, "mensaje")
     else:
-        chat.insert(tkinter.END, "\n\n" + "->"+ " " + message, "mensaje")
+        chat.insert(tkinter.END, "\n\n" + "-> "+ " " + message, "mensaje")
 
     #Desabilitar pantalla de visualizacion para insertar texto
     chat.config(state=tkinter.DISABLED)
