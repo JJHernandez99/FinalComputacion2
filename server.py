@@ -108,7 +108,7 @@ def handle_client(client_connection, addr):
             print(file_buffer)
             client_connection.send("Archivo recibido".encode())
 
-        index = get_client_index(clients, client_connection)
+        index = get_client(clients, client_connection)
         sending_client_name = users[index]
 
         for i in clients:
@@ -116,10 +116,9 @@ def handle_client(client_connection, addr):
                 server_msg = str(sending_client_name + "->" + client_msg)
                 i.send(server_msg.encode())
 
-    # find the client index then remove from both lists(client name list and connection list)
-    index = get_client_index(clients, client_connection)
-    del users[index]
-    del clients[index]
+    index = get_client(clients, client_connection) 
+    del users[index] #Elimino el cliente del server 
+    del clients[index] #Elimino el cliente de la conexcion
     server_msg = "BYE!"
     client_connection.send(server_msg.encode())
     client_connection.close()
@@ -127,7 +126,7 @@ def handle_client(client_connection, addr):
     update_list(users)  #Actualizar nombre de usuarios en pantalla
 
 #Devuelve el índice del cliente actual en la lista de clientes
-def get_client_index(client_list, curr_client):
+def get_client(client_list, curr_client):
     index = 0
     for conexion in client_list:
         if conexion == curr_client:
@@ -144,10 +143,10 @@ def update_list(list_users):
         lista.insert(tkinter.END, i +"\n")
     lista.config(state=tkinter.DISABLED)
 
+#Agrego a la carpeta files los archivos enviados por los clientes
 def save_file(data, name):
     data_b = bytearray(data)
-    path_result = os.getcwd() + "/files/" + name
-   
+    path_result = os.getcwd() + "/files/" + name 
     f = open(path_result, 'wb')
     f.write(data_b)
     f.close()
