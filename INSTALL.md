@@ -13,6 +13,12 @@
     cd FinalComputacion2
     ```
 
+- Instalar dependencias
+    ```
+    pip3 install -r req
+    
+    ```
+
 - Ejecturar servidor y cliente
 
     Servidor
@@ -21,5 +27,7 @@
 
     ```
     Cliente
+    ```
+    python3 client.py -p 5000
 
-    python3 client.py -p 5000 -n "nombre cliente"
+    ```
