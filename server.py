@@ -1,6 +1,7 @@
 import socket,threading
 from argumentos import parser
 import tkinter 
+import os
 
 server = None
 args=parser()
@@ -75,8 +76,7 @@ def accept_clients(the_server, y):
         #thread = threading.Thread(target=handle_client, args=(client,addr)) #REVISAR
         #thread.start()
 
-# Función para recibir mensaje del cliente actual Y
-# Enviar ese mensaje a otros clientes
+# Función para recibir mensaje del cliente actual y enviar ese mensaje a otros clientes
 def handle_client(client_connection, addr):
     global server, client_name, clients
     client_msg = " "
@@ -95,8 +95,18 @@ def handle_client(client_connection, addr):
         data = client_connection.recv(4096).decode()
         if not data: break
         if data == "exit": break
-
         client_msg = data
+
+        if client_msg.startswith("Bytes:") :
+            file_data = client_msg.split(" ")
+            size = int(file_data[1])
+            print("Se recibio un archivo con bytes " + file_data[1] + " con nombre: " + file_data[2])
+
+            file_buffer = client_connection.recv(size)
+            save_file(file_buffer, file_data[2])
+            data = client_connection.recv(4096).decode()
+            print(file_buffer)
+            client_connection.send("Archivo recibido".encode())
 
         index = get_client_index(clients, client_connection)
         sending_client_name = users[index]
@@ -133,5 +143,13 @@ def update_list(list_users):
     for i in list_users:
         lista.insert(tkinter.END, i +"\n")
     lista.config(state=tkinter.DISABLED)
+
+def save_file(data, name):
+    data_b = bytearray(data)
+    path_result = os.getcwd() + "/files/" + name
+   
+    f = open(path_result, 'wb')
+    f.write(data_b)
+    f.close()
 
 screen_servidor.mainloop()

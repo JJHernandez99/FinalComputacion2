@@ -2,6 +2,7 @@ import socket, threading
 from argumentos import parser
 import tkinter 
 from tkinter import filedialog
+import os 
 
 # Conexion Cliente
 client = None
@@ -41,12 +42,15 @@ def connect():
 def upload_file(frame):
     file = filedialog.askopenfile(parent=frame,mode='rb',title='Choose a file')
     if file != None:
+        file_name = os.path.basename(str(file.name))
+        
+        print(file_name)
+
         data = file.read()       
-        # send_file_to_server(data)
-        # print(file.name)
-        # name_file = 
+        send_file(data,file_name)
         file.close()
         print("Tiene %d bytes el archivo." % len(data))
+
 
 #Recive los mensaje enviados al server para mostrar
 def client_receive(socket,m):
@@ -97,8 +101,8 @@ def send_message(message):
     print("Mensaje enviado")
 
 #Enviar archivos al server ##REVISAR
-def send_file(file,name):
-    client.send("Nombre de Archivo: {}".format(name).encode())
+def send_file(file,file_name):
+    client.send("Bytes: {} {}".format(len(file) ,file_name).encode())
     client.send(file)
     client.send("termino".encode())
     print("Se envio al server el archivo")
