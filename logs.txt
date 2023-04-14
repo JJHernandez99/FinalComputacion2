@@ -1,0 +1,12 @@
+2023-04-14 19:16:45,264 INFO "---------- Servidor corriendo ----------"
+2023-04-14 19:17:19,664 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 60324) ---------"
+2023-04-14 19:17:37,839 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 51700) ---------"
+2023-04-14 19:18:31,916 INFO Pedro-> Hola, como estas?
+2023-04-14 19:18:37,080 INFO Joaquin-> Todo bien 
+2023-04-14 19:18:38,585 INFO Joaquin-> vos ? 
+2023-04-14 19:18:42,296 INFO Pedro-> Bien 
+2023-04-14 19:18:47,467 INFO Pedro-> me mandas el archivo
+2023-04-14 19:18:49,986 INFO Joaquin-> Si 
+2023-04-14 19:18:58,391 INFO Joaquin-> Bytes: 35866 Diagram-Principal.png
+2023-04-14 19:19:10,939 INFO Pedro-> gracias
+2023-04-14 19:19:25,229 INFO "---------- Se paro el servidor----------"

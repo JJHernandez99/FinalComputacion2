@@ -2,7 +2,11 @@ import socket, threading
 from argumentos import parser
 import tkinter 
 from tkinter import filedialog
-import os 
+import os
+import tkinter.messagebox
+from PIL import Image, ImageTk
+import PyPDF2
+import ast
 
 # Conexion Cliente
 client = None
@@ -23,9 +27,10 @@ def connect_to_server(name):
         msg.config(state=tkinter.NORMAL)
 
         # inicia un hilo para seguir recibiendo mensajes del servidor
-        threading._start_new_thread(client_receive, (client, "m")) 
-        # thread = threading.Thread(target=client_receive, args=(client,"m")) ## REVISAR
-        # thread.start()
+        #threading._start_new_thread(client_receive, (client, "m")) 
+        thread = threading.Thread(target=client_receive, args=(client,"m")) ## REVISAR
+        thread.start()
+
     except Exception as e:
         tkinter.messagebox.showerror(title="ERROR!!!", message="Servidor inaccesible")
 
@@ -33,7 +38,7 @@ def connect_to_server(name):
 def connect():
     global username, client
     if len(name_user.get()) < 1:
-        tkinter.messagebox.showerror(title="ERROR!!!", message="Ingrese su nombre !!!")
+        tkinter.messagebox.showerror(title="ERROR!!!", message="Ingrese su nombre !!!") 
     else:
         username = name_user.get()
         connect_to_server(username)
@@ -56,6 +61,7 @@ def upload_file(frame):
 def client_receive(socket,m):
     while True:
         from_server = socket.recv(4096).decode()
+        
         if not from_server: break
         #Muestra por pantalla mensaje del servidor
         texts = chat.get("1.0", tkinter.END).strip()
@@ -71,6 +77,81 @@ def client_receive(socket,m):
     socket.close()
     screen_cliente.destroy() 
 
+    
+def view_file(frame):
+    
+    file_path = filedialog.askopenfilename(initialdir='/Documentos/Universidad/Compu-TP-FINAL-Modificaciones/FinalComputacion2-09-04-2023-V2/FinalComputacion2/files', title='Seleccione un archivo')
+    _, file_extension = os.path.splitext(file_path)
+
+    if file_extension.lower() == '.txt':
+        with open(file_path, 'r') as file:
+            content = file.read()
+
+        # Crear una nueva ventana para mostrar el contenido del archivo
+        window = tkinter.Toplevel()
+        window.title(file_path)
+        text = tkinter.Text(window)
+        text.pack()
+        text.insert(tkinter.END, content)
+
+    elif file_extension.lower() in ['.jpg', '.jpeg', '.png']:
+        image = Image.open(file_path)
+        photo = ImageTk.PhotoImage(image)
+
+        # Crear una nueva ventana para mostrar la imagen
+        window = tkinter.Toplevel()
+        window.title(file_path)
+        label = tkinter.Label(window, image=photo)
+        label.image = photo
+        label.pack()
+
+    elif file_extension.lower() == '.pdf':
+        pdf_file = open(file_path, 'rb')
+        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
+        page = pdf_reader.getPage(0)
+        width, height = int(page.cropBox.getWidth()), int(page.cropBox.getHeight())
+        image = page.cropBox
+        photo = ImageTk.PhotoImage(image)
+
+        # Crear una nueva ventana para mostrar el archivo PDF
+        window = tkinter.Toplevel()
+        window.title(file_path)
+        canvas = tkinter.Canvas(window, width=width, height=height)
+        canvas.pack()
+        canvas.create_image(0, 0, anchor='nw', image=photo)
+    
+    elif file_extension.lower() == '.sql':
+        with open(file_path, 'r') as file:
+            content = file.read()
+        # Crear una nueva ventana para mostrar el contenido del archivo
+        window = tkinter.Toplevel()
+        window.title(file_path)
+        text = tkinter.Text(window)
+        text.pack()
+        text.insert(tkinter.END, content)
+        
+    # elif file_extension.lower() == '.py':
+    #     with open(file_path, 'r') as file:
+    #         content = file.read()
+
+    #     # Parsear el contenido del archivo usando el módulo ast
+    #     parsed_content = ast.parse(content)
+
+    #     # Crear una nueva ventana para mostrar el contenido del archivo
+    #     window = tkinter.Toplevel()
+    #     window.title(file_path)
+    #     text = tkinter.Text(window)
+    #     text.pack()
+
+    # # Mostrar el contenido de manera adecuada usando el módulo ast
+    #     for node in ast.walk(parsed_content):
+    #         if isinstance(node, ast.Expr):
+    #             text.insert(tkinter.END, f"{ast.dump(node)}\n")
+
+    else:
+        # Tipo de archivo no compatible
+        print(f"Tipo de archivo no compatible: {file_extension}")
+
 #Funcion de enviar mensajes (cliente)
 def client_send(message):
     message = message.replace('\n', '')
@@ -80,26 +161,23 @@ def client_send(message):
     chat.config(state=tkinter.NORMAL)
     if len(texts) < 1:
         chat.insert(tkinter.END, "-> "+ " " + message, "mensaje")
+        
     else:
         chat.insert(tkinter.END, "\n\n" + "-> "+ " " + message, "mensaje")
 
     #Desabilitar pantalla de visualizacion para insertar texto
     chat.config(state=tkinter.DISABLED)
-
     send_message(message)
 
     chat.see(tkinter.END)
     msg.delete('1.0', tkinter.END)
 
+
 #Enviar mensaje al server
 def send_message(message):
     client_msg = str(message)
     client.send(client_msg.encode())
-    if message == "exit":
-        client.close()
-        screen_cliente.destroy()
-    print("Mensaje enviado")
-
+            
 #Enviar archivos al server ##REVISAR
 def send_file(file,file_name):
     client.send("Bytes: {} {}".format(len(file) ,file_name).encode())
@@ -141,8 +219,19 @@ msg = tkinter.Text(bottomFrame, height=2, width=30)
 msg.pack(side=tkinter.LEFT)
 msg.config(highlightbackground="grey", state="disabled")
 msg.bind("<Return>", (lambda event: client_send(msg.get("1.0", tkinter.END))))
-upload_button = tkinter.Button(bottomFrame, text="Subir archivo", command=(lambda: upload_file(bottomFrame)))
+upload_button = tkinter.Button(bottomFrame, text="Subir archivo",bg='green',command=(lambda: upload_file(bottomFrame)))
 upload_button.pack(side=tkinter.LEFT)
+button2 = tkinter.Button(text="Browse",bg='blue',command=(lambda: view_file(bottomFrame)))
+button2.pack(side=tkinter.LEFT)
 bottomFrame.pack(side=tkinter.BOTTOM, padx=5)
+
+def cerrar_ventana():
+    # Preguntar al usuario si realmente desea cerrar la ventana
+    respuesta = tkinter.messagebox.askyesno("Salir", "¿Realmente desea salir?")
+    if respuesta == True:
+        screen_cliente.destroy()
+
+# Configurar el botón de cierre de la ventana
+screen_cliente.protocol("WM_DELETE_WINDOW", cerrar_ventana)
 
 screen_cliente.mainloop()

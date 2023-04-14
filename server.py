@@ -2,6 +2,7 @@ import socket,threading
 from argumentos import parser
 import tkinter 
 import os
+import logging
 
 server = None
 args=parser()
@@ -60,10 +61,16 @@ def start_server():
     label_host["text"] = "Host: " + host
     label_port["text"] = "Port: " + str(port)
 
+    #Log de arranque de servidor 
+    hilo = threading.Thread(target=actualizar_log_controlado, name='"---------- Servidor corriendo ----------"')
+    hilo.start()
+
 #Funcion para parar servidor
 def stop_server():
     global server
     button_connect.config(state=tkinter.NORMAL)
+    hilo = threading.Thread(target=actualizar_log_controlado, name='"---------- Se paro el servidor----------"')
+    hilo.start()
     button_stop.config(state=tkinter.DISABLED)
 
 #Funcion para aceptar las conexiones de los clients
@@ -75,6 +82,10 @@ def accept_clients(the_server, y):
         threading._start_new_thread(handle_client, (client, addr))
         #thread = threading.Thread(target=handle_client, args=(client,addr)) #REVISAR
         #thread.start()
+        
+        #Log nuevo cliente 
+        hilo = threading.Thread(target=actualizar_log_controlado, name=f'"---- Se conecto un nuevo cliente al serivdor: {addr} ---------"')
+        hilo.start()
 
 # Función para recibir mensaje del cliente actual y enviar ese mensaje a otros clientes
 def handle_client(client_connection, addr):
@@ -85,16 +96,26 @@ def handle_client(client_connection, addr):
     client_name  = client_connection.recv(4096).decode()
     welcome_msg = ""+ client_name + " te has unido al chat"
     client_connection.send(welcome_msg.encode())
-
     users.append(client_name)
 
     update_list(users)  #Actualizar nombre de usuarios en pantalla
 
     #Recorre en bloques 
     while True:
-        data = client_connection.recv(4096).decode()
+        try:
+            data = client_connection.recv(500000).decode()
+        except UnicodeDecodeError as eror:
+            data = ""
         if not data: break
-        if data == "exit": break
+        if data == "/exit":
+            print("Salio el usuario con exito")
+            break
+        if data == "/list":
+            connected_clients = ", ".join(users)
+            server_msg = "Usuarios conectados: " + connected_clients
+            client_connection.send(server_msg.encode())
+
+            
         client_msg = data
 
         if client_msg.startswith("Bytes:") :
@@ -105,21 +126,27 @@ def handle_client(client_connection, addr):
             file_buffer = client_connection.recv(size)
             save_file(file_buffer, file_data[2])
             data = client_connection.recv(4096).decode()
-            print(file_buffer)
             client_connection.send("Archivo enviado".encode())
 
         index = get_client(clients, client_connection)
         sending_client_name = users[index]
 
+        
+        #Se envia x cada cliente
         for i in clients:
             if i != client_connection:
                 server_msg = str(sending_client_name + "-> " + client_msg)
                 i.send(server_msg.encode())
 
+                #Log msg de cada cliente 
+                hilo = threading.Thread(target=actualizar_log_controlado, name=server_msg)
+                hilo.start()    
+
     index = get_client(clients, client_connection)
     del users[index] #Elimino el cliente del server
-    del clients[index] #Elimino el cliente de la conexcion
+    del clients[index] #Elimino el cliente de la conexion
     server_msg = "BYE!"
+   
     client_connection.send(server_msg.encode())
     client_connection.close()
 
@@ -150,5 +177,26 @@ def save_file(data, name):
     f = open(path_result, 'wb')
     f.write(data_b)
     f.close()
+
+
+lock_acceso_archivo_log = threading.Lock() #Se crea el bloqueo
+
+#Mutex para el manejo de log de clientes / conexiones 
+def actualizar_log_controlado():
+    global lock_acceso_archivo_log
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(message)s',
+        handlers=[
+            logging.FileHandler("logs.txt"),
+            logging.StreamHandler()
+        ]
+    )
+    
+    lock_acceso_archivo_log.acquire() #Bloquea el uso del log
+    logging.info(threading.current_thread().name)
+    lock_acceso_archivo_log.release() #Libera el uso del log
+
 
 screen_servidor.mainloop()
