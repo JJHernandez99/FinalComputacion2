@@ -1,16 +1,20 @@
 import socket,threading
 from argumentos import parser
 import tkinter 
+from tkinter import messagebox
 import os
 import logging
+import multiprocessing 
 
 server = None
 args=parser()
-host = '127.0.0.1'
+host_4 = '127.0.0.1'
+host_6 = '::1'
 port = args.port
 clients_name = " "
 clients = []
 users = []
+validated_users = []
 
 #FRONT-END SERVER
 #Ventana servidor
@@ -42,62 +46,131 @@ lista.pack()
 lista.config(background="#FFFFFF", highlightbackground="#044f75", state="disabled")
 clientFrame.pack(side=tkinter.BOTTOM, pady=(10, 20))
 
+#Mutex para el manejo de log de clientes / conexiones 
+def control_log():
+    global lock_acceso_archivo_log
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(message)s',
+        handlers=[
+            logging.FileHandler("logs.txt"),
+            logging.StreamHandler()
+        ]
+    )
+    
+    lock_acceso_archivo_log.acquire() #Bloquea el uso del log
+    logging.info(threading.current_thread().name)
+    lock_acceso_archivo_log.release() #Libera el uso del log
+
+lock_acceso_archivo_log = threading.Lock() #Se crea el bloqueo
+
+def validate_username(name):
+    usuarios_permitidos_path = "/home/jhernandez/Documentos/Universidad/FinalComputacion2/users.txt"
+    if not os.path.isfile(usuarios_permitidos_path):
+        return False
+
+    with open(usuarios_permitidos_path, "r") as f:
+        usuarios_permitidos = [line.strip() for line in f]
+
+    if name not in usuarios_permitidos:
+        return False
+
+    return True
+
+# función para validar el usuario a través de un proceso separado
+def validate_username_process(name, result_queue):
+    result_queue.put(validate_username(name))
+
 #Funcion para arrancar el servidor
 def start_server():
     button_connect.config(state=tkinter.DISABLED)
     button_stop.config(state=tkinter.NORMAL)
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(socket.AF_INET)
-    print(socket.SOCK_STREAM)
+    # crear una cola compartida para pasar los resultados de validación del nombre de usuario
+    result_queue = multiprocessing.Queue()
+    
+    # crear un proceso para validar los usuarios permitidos
+    usuarios_permitidos_process = multiprocessing.Process(target=validate_username_process)
+    usuarios_permitidos_process.start()
 
-    server.bind((host, port))
-    server.listen()
+    print("PROCESO CORRIENDO VALIDACION - start server funcion")
+    print(result_queue)
 
-    #threading._start_new_thread(accept_clients, (server, " "))  
-    thread = threading.Thread(target=accept_clients, args=(server," "))
-    thread.start()
+   # Crear sockets para IPv4 e IPv6
+    server_ipv4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_ipv6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
-    label_host["text"] = "Host: " + host
+    # Enlazar y escuchar en ambos sockets
+    server_ipv4.bind((host_4, port))
+    server_ipv6.bind((host_6, port))
+    server_ipv4.listen()
+    server_ipv6.listen()
+
+    # Crear hilos para aceptar clientes en ambos sockets
+    thread_ipv4 = threading.Thread(target=accept_clients, args=(server_ipv4," ",result_queue))
+    thread_ipv4.start()
+
+    thread_ipv6 = threading.Thread(target=accept_clients, args=(server_ipv6," ",result_queue))
+    thread_ipv6.start()
+
+    label_host["text"] = "Host: " + host_4
     label_port["text"] = "Port: " + str(port)
 
     #Log de arranque de servidor 
-    hilo = threading.Thread(target=actualizar_log_controlado, name='"---------- Servidor corriendo ----------"')
+    hilo = threading.Thread(target=control_log, name='"---------- Servidor corriendo ----------"')
     hilo.start()
 
 #Funcion para parar servidor
 def stop_server():
     global server
     button_connect.config(state=tkinter.NORMAL)
-    hilo = threading.Thread(target=actualizar_log_controlado, name='"---------- Se paro el servidor----------"')
+    hilo = threading.Thread(target=control_log, name='"---------- Se paro el servidor----------"')
     hilo.start()
     button_stop.config(state=tkinter.DISABLED)
 
-#Funcion para aceptar las conexiones de los clients
-def accept_clients(the_server, y):
-    while True:
+#Funcion para aceptar las conexiones de los clientes
+def accept_clients(the_server, y,result_queue):
+     while True:
         client, addr = the_server.accept()
+
+        username = client.recv(4096).decode() #Tomo el nombre del usuario que ingresa
+        result_queue = multiprocessing.Queue()
+        process = multiprocessing.Process(target=validate_username_process, args=(username, result_queue))
+        process.start()
+        print("PROCESO CORRIENDO VALIDACION - aceptar cliente funcion")
+        print(result_queue)
+        process.join()
+
+        if not result_queue.get():
+            error_msg = "Usuario no permitido. Desconectando..."
+            client.send(error_msg.encode())
+            client.close()
+            #Log del error
+            hilo = threading.Thread(target=control_log, name=f'"---- {error_msg} ---------"')
+            hilo.start()
+            continue
+
         clients.append(client)
-        
-        threading._start_new_thread(handle_client, (client, addr))
-        #thread = threading.Thread(target=handle_client, args=(client,addr)) #REVISAR
-        #thread.start()
-        
+        validated_users.append(username)
+
+        thread = threading.Thread(target=handle_client, args=(client, addr, username))
+        thread.start()
+
         #Log nuevo cliente 
-        hilo = threading.Thread(target=actualizar_log_controlado, name=f'"---- Se conecto un nuevo cliente al serivdor: {addr} ---------"')
+        hilo = threading.Thread(target=control_log, name=f'"---- Se conecto un nuevo cliente al serivdor: {username} ---------"')
         hilo.start()
 
 # Función para recibir mensaje del cliente actual y enviar ese mensaje a otros clientes
-def handle_client(client_connection, addr):
-    global server, client_name, clients
+def handle_client(client_connection, addr, username):
+    global server, clients, users, validated_users
     client_msg = " "
+    validated = True
 
     # Mensaje de bienvenida
-    client_name  = client_connection.recv(4096).decode()
-    welcome_msg = ""+ client_name + " te has unido al chat"
+    welcome_msg = f"{username} te has unido al chat"
     client_connection.send(welcome_msg.encode())
-    users.append(client_name)
-
+    users.append(username)
     update_list(users)  #Actualizar nombre de usuarios en pantalla
 
     #Recorre en bloques 
@@ -109,12 +182,23 @@ def handle_client(client_connection, addr):
         if not data: break
         if data == "/exit":
             print("Salio el usuario con exito")
+            # Elimina el hilo del cliente
+            for thread in threading.enumerate():
+                if thread.name == f'Thread for {username}':
+                    thread.join()
+
+            # Agrega al archivo log que el cliente ha salido
+            with open('logs.txt', 'a') as file:
+                file.write(f'{username} ha salido del chat.\n')
             break
+
         if data == "/list":
             connected_clients = ", ".join(users)
             server_msg = "Usuarios conectados: " + connected_clients
             client_connection.send(server_msg.encode())
 
+        if not validated:
+            break
             
         client_msg = data
 
@@ -139,7 +223,7 @@ def handle_client(client_connection, addr):
                 i.send(server_msg.encode())
 
                 #Log msg de cada cliente 
-                hilo = threading.Thread(target=actualizar_log_controlado, name=server_msg)
+                hilo = threading.Thread(target=control_log, name=server_msg)
                 hilo.start()    
 
     index = get_client(clients, client_connection)
@@ -178,25 +262,6 @@ def save_file(data, name):
     f.write(data_b)
     f.close()
 
-
-lock_acceso_archivo_log = threading.Lock() #Se crea el bloqueo
-
-#Mutex para el manejo de log de clientes / conexiones 
-def actualizar_log_controlado():
-    global lock_acceso_archivo_log
-    
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(levelname)s %(message)s',
-        handlers=[
-            logging.FileHandler("logs.txt"),
-            logging.StreamHandler()
-        ]
-    )
-    
-    lock_acceso_archivo_log.acquire() #Bloquea el uso del log
-    logging.info(threading.current_thread().name)
-    lock_acceso_archivo_log.release() #Libera el uso del log
 
 
 screen_servidor.mainloop()

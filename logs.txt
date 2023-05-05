@@ -10,3 +10,165 @@
 2023-04-14 19:18:58,391 INFO Joaquin-> Bytes: 35866 Diagram-Principal.png
 2023-04-14 19:19:10,939 INFO Pedro-> gracias
 2023-04-14 19:19:25,229 INFO "---------- Se paro el servidor----------"
+2023-04-15 21:55:58,752 INFO "---------- Servidor corriendo ----------"
+2023-04-15 22:11:50,025 INFO "---------- Servidor corriendo ----------"
+2023-04-16 18:49:03,191 INFO "---------- Servidor corriendo ----------"
+2023-04-16 18:49:14,269 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 52444) ---------"
+2023-04-16 19:44:20,871 INFO "---------- Servidor corriendo ----------"
+2023-04-16 19:44:31,775 INFO Nuevo Cliente: Joaquin (127.0.0.1:44722)
+2023-04-16 19:44:50,620 INFO Nuevo Cliente: Pedro (127.0.0.1:59062)
+2023-04-16 20:52:42,580 INFO "---------- Servidor corriendo ----------"
+2023-04-16 20:54:13,916 INFO Martina-> Hoa
+2023-04-16 20:54:22,872 INFO Joaquin-> /list
+2023-04-16 20:54:41,642 INFO "---------- Se paro el servidor----------"
+2023-04-17 09:40:19,787 INFO "---------- Servidor corriendo ----------"
+2023-04-17 09:41:29,329 INFO Joaquin-> Hoa
+2023-04-17 09:41:38,360 INFO "---------- Se paro el servidor----------"
+2023-04-18 09:27:56,093 INFO "---------- Servidor corriendo ----------"
+2023-04-18 09:28:29,383 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 42576) ---------"
+2023-04-18 09:41:31,083 INFO "---------- Servidor corriendo ----------"
+2023-04-18 10:22:21,104 INFO "---------- Servidor corriendo ----------"
+2023-04-18 10:22:43,888 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 45528) ---------"
+2023-04-18 18:07:57,299 INFO "---------- Servidor corriendo ----------"
+2023-04-18 18:08:18,395 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 54612) ---------"
+2023-04-18 18:43:34,892 INFO "---------- Servidor corriendo ----------"
+2023-04-18 18:43:46,000 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 35784) ---------"
+2023-04-18 18:44:10,339 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 50498) ---------"
+2023-04-18 18:44:48,126 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 38328) ---------"
+2023-04-18 18:49:17,361 INFO "---------- Se paro el servidor----------"
+2023-04-18 18:49:40,431 INFO "---------- Servidor corriendo ----------"
+2023-04-18 18:49:51,185 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 45606) ---------"
+2023-04-18 18:52:39,964 INFO "---------- Servidor corriendo ----------"
+2023-04-18 18:52:52,151 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 53712) ---------"
+2023-04-18 18:53:25,775 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 59170) ---------"
+2023-04-18 18:54:33,035 INFO "---------- Servidor corriendo ----------"
+2023-04-18 18:54:41,439 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 54856) ---------"
+2023-04-18 18:59:08,415 INFO "---------- Servidor corriendo ----------"
+2023-04-18 19:08:09,963 INFO "---------- Servidor corriendo ----------"
+2023-04-18 19:08:22,412 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 37708) ---------"
+2023-04-20 11:24:47,062 INFO "---------- Servidor corriendo ----------"
+2023-04-20 11:25:06,639 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 58870) ---------"
+2023-04-20 11:27:24,508 INFO "---------- Servidor corriendo ----------"
+2023-04-20 11:27:45,058 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 48318) ---------"
+2023-04-21 01:15:54,327 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:16:56,344 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:17:14,712 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 37878) ---------"
+2023-04-21 01:18:50,909 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:18:57,663 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 50444) ---------"
+2023-04-21 01:19:07,505 INFO "---------- Se paro el servidor----------"
+2023-04-21 01:21:19,620 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:21:29,375 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 46358) ---------"
+2023-04-21 01:21:42,454 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 43424) ---------"
+2023-04-21 01:22:46,649 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 51438) ---------"
+2023-04-21 01:28:06,362 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:29:39,926 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:33:37,194 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:36:43,119 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:37:02,755 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 41828) ---------"
+2023-04-21 01:38:28,385 INFO "---------- Se paro el servidor----------"
+2023-04-21 01:38:34,449 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:38:43,367 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 52854) ---------"
+2023-04-21 01:43:01,274 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:47:01,891 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:47:58,887 INFO "---------- Se paro el servidor----------"
+2023-04-21 01:48:08,079 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:48:26,140 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 54110) ---------"
+2023-04-21 01:56:13,613 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:56:21,797 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 43986) ---------"
+2023-04-21 01:57:43,077 INFO "---------- Servidor corriendo ----------"
+2023-04-21 01:57:55,862 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 38784) ---------"
+2023-04-21 01:59:33,500 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 48946) ---------"
+2023-04-21 01:59:42,906 INFO Joaquin-> Hola
+2023-04-21 01:59:48,274 INFO Pedro-> Hola Joaquin
+2023-04-21 01:59:51,837 INFO Pedro-> como estas?
+2023-04-21 02:03:08,524 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:03:51,479 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 51122) ---------"
+2023-04-21 02:05:32,934 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:07:56,982 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:09:06,190 INFO "---------- Se paro el servidor----------"
+2023-04-21 02:09:09,230 INFO "---------- Se paro el servidor----------"
+2023-04-21 02:09:14,372 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:09:23,432 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 39980) ---------"
+2023-04-21 02:20:07,390 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:20:15,012 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 44680) ---------"
+2023-04-21 02:20:35,941 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 44236) ---------"
+2023-04-21 02:23:09,770 INFO "---------- Se paro el servidor----------"
+2023-04-21 02:23:16,847 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:23:35,585 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 60308) ---------"
+2023-04-21 02:26:52,281 INFO "---------- Servidor corriendo ----------"
+2023-04-21 02:27:03,421 INFO "---- Se conecto un nuevo cliente al serivdor: ('127.0.0.1', 35630) ---------"
+2023-04-24 20:37:20,755 INFO "---------- Servidor corriendo ----------"
+2023-04-24 20:37:41,868 INFO "---- Se conecto un nuevo cliente al serivdor: Pedro ---------"
+2023-04-24 20:38:08,458 INFO "---- Usuario no permitido. Desconectando... ---------"
+2023-04-24 20:39:11,172 INFO "---- Usuario no permitido. Desconectando... ---------"
+2023-04-24 20:39:25,725 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-04-24 20:39:28,397 INFO Joaquin-> Hola
+2023-04-24 20:39:30,582 INFO Joaquin-> como estas?
+2023-04-24 20:39:40,175 INFO Pedro-> Todo bien Joaquin 
+2023-04-24 20:39:41,321 INFO Pedro-> vos?
+2023-04-24 20:39:45,439 INFO Pedro-> te envio el documento ?
+2023-04-24 20:39:49,328 INFO Joaquin-> Dale perfecto
+2023-04-24 20:39:55,515 INFO Pedro-> Bytes: 35866 Diagram-Principal.png
+2023-04-24 20:46:18,247 INFO Pedro-> Hola
+2023-04-24 20:46:20,849 INFO Pedro-> Si 
+2023-04-24 20:46:22,950 INFO Pedro-> todo bien 
+2023-04-24 20:46:30,044 INFO Joaquin-> Ahi te mando el archivo
+2023-04-24 20:46:36,081 INFO Joaquin-> Bytes: 34 Prueba.txt
+2023-04-24 20:47:34,018 INFO "---- Se conecto un nuevo cliente al serivdor: Federica ---------"
+2023-04-24 20:47:41,891 INFO Pedro-> Hola Fede
+2023-04-24 20:47:41,892 INFO Pedro-> Hola Fede
+2023-04-24 20:47:44,741 INFO Pedro-> como estas?
+2023-04-24 20:47:44,741 INFO Pedro-> como estas?
+2023-04-24 20:47:49,087 INFO Federica-> Todo bien
+2023-04-24 20:47:49,087 INFO Federica-> Todo bien
+2023-04-24 20:47:55,699 INFO Joaquin-> Holaaaaa
+2023-04-24 20:47:55,699 INFO Joaquin-> Holaaaaa
+2023-04-24 20:47:57,675 INFO Joaquin-> como estas?
+2023-04-24 20:47:57,676 INFO Joaquin-> como estas?
+2023-04-24 20:48:02,376 INFO Joaquin-> te mando el archivo
+2023-04-24 20:48:02,376 INFO Joaquin-> te mando el archivo
+2023-04-24 20:48:13,450 INFO Joaquin-> Bytes: 20783 Diagram-Sockets.png
+2023-04-24 20:48:13,451 INFO Joaquin-> Bytes: 20783 Diagram-Sockets.png
+Federica ha salido del chat.
+Joaquin ha salido del chat.
+Pedro ha salido del chat.
+2023-04-24 20:48:59,570 INFO "---------- Se paro el servidor----------"
+2023-05-02 19:47:49,477 INFO "---------- Servidor corriendo ----------"
+2023-05-02 19:48:30,226 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-05-02 19:48:49,032 INFO "---- Usuario no permitido. Desconectando... ---------"
+Joaquin ha salido del chat.
+2023-05-03 17:12:59,346 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:14:51,694 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:15:09,998 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-05-03 17:15:42,383 INFO "---- Usuario no permitido. Desconectando... ---------"
+2023-05-03 17:31:35,840 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:36:21,992 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:36:51,940 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-05-03 17:37:06,318 INFO "---- Usuario no permitido. Desconectando... ---------"
+2023-05-03 17:39:21,480 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:40:00,524 INFO "---------- Se paro el servidor----------"
+2023-05-03 17:41:38,739 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:42:42,597 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-05-03 17:42:59,271 INFO "---- Usuario no permitido. Desconectando... ---------"
+2023-05-03 17:44:25,612 INFO "---------- Servidor corriendo ----------"
+2023-05-03 17:44:45,015 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-05-03 17:45:00,247 INFO "---- Se conecto un nuevo cliente al serivdor: Pedro ---------"
+2023-05-03 17:45:02,542 INFO Pedro-> Hola
+2023-05-03 17:45:05,680 INFO Pedro-> como estas joaquin?
+2023-05-03 17:45:12,286 INFO Joaquin-> Todo bien Pedro
+2023-05-03 17:45:13,781 INFO Joaquin-> vos ?
+2023-05-03 17:45:17,221 INFO Pedro-> Bin 
+2023-05-03 17:45:20,581 INFO Pedro-> te mando el archivo
+2023-05-03 17:45:26,635 INFO Pedro-> Bytes: 35866 Diagram-Principal.png
+2023-05-04 19:27:52,658 INFO "---------- Se paro el servidor----------"
+2023-05-04 20:00:14,092 INFO "---------- Se paro el servidor----------"
+2023-05-04 20:00:37,292 INFO "---------- Se paro el servidor----------"
+2023-05-04 20:01:25,702 INFO "---------- Se paro el servidor----------"
+2023-05-04 20:02:44,905 INFO "---------- Se paro el servidor----------"
+2023-05-04 20:12:18,258 INFO "---------- Servidor corriendo ----------"
+2023-05-04 20:12:30,711 INFO "---------- Se paro el servidor----------"
+2023-05-04 20:12:41,406 INFO "---------- Servidor corriendo ----------"
+2023-05-05 10:15:40,751 INFO "---------- Servidor corriendo ----------"
+2023-05-05 10:16:00,456 INFO "---- Se conecto un nuevo cliente al serivdor: Franco ---------"
+2023-05-05 10:16:27,118 INFO "---- Se conecto un nuevo cliente al serivdor: Joaquin ---------"
+2023-05-05 10:17:51,075 INFO "---------- Servidor corriendo ----------"

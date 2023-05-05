@@ -11,23 +11,30 @@ import ast
 # Conexion Cliente
 client = None
 args=parser()
-host='127.0.0.1'
 port=args.port
 name = args.name
+ipv6 = '::1'
+ipv4 = '127.0.0.1'
 
 def connect_to_server(name):
-    global client, port, host
+    global client, port
     try:
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((host, port))
+        # primero intenta conectarse con IPv6
+        client = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        try:
+            client.connect((ipv6, port))
+        except:
+            # si falla, intenta conectarse con IPv4
+            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client.connect((ipv4, port))
+        
         client.send(name.encode()) # Enviar nombre de usuario al servidor después de conectar
 
         name_user.config(state=tkinter.DISABLED)
         button_connect.config(state=tkinter.DISABLED)
         msg.config(state=tkinter.NORMAL)
 
-        # inicia un hilo para seguir recibiendo mensajes del servidor
-        #threading._start_new_thread(client_receive, (client, "m")) 
+        #Creo Hilos y lo lanzo
         thread = threading.Thread(target=client_receive, args=(client,"m")) ## REVISAR
         thread.start()
 
@@ -80,7 +87,7 @@ def client_receive(socket,m):
     
 def view_file(frame):
     
-    file_path = filedialog.askopenfilename(initialdir='/Documentos/Universidad/Compu-TP-FINAL-Modificaciones/FinalComputacion2-09-04-2023-V2/FinalComputacion2/files', title='Seleccione un archivo')
+    file_path = filedialog.askopenfilename(initialdir='/home/jhernandez/Documentos/Universidad/FinalComputacion2/files', title='Seleccione un archivo')
     _, file_extension = os.path.splitext(file_path)
 
     if file_extension.lower() == '.txt':
@@ -130,23 +137,23 @@ def view_file(frame):
         text.pack()
         text.insert(tkinter.END, content)
         
-    # elif file_extension.lower() == '.py':
-    #     with open(file_path, 'r') as file:
-    #         content = file.read()
+    elif file_extension.lower() == '.py':
+        with open(file_path, 'r') as file:
+            content = file.read()
 
-    #     # Parsear el contenido del archivo usando el módulo ast
-    #     parsed_content = ast.parse(content)
+        # Parsear el contenido del archivo usando el módulo ast
+        parsed_content = ast.parse(content)
 
-    #     # Crear una nueva ventana para mostrar el contenido del archivo
-    #     window = tkinter.Toplevel()
-    #     window.title(file_path)
-    #     text = tkinter.Text(window)
-    #     text.pack()
+        # Crear una nueva ventana para mostrar el contenido del archivo
+        window = tkinter.Toplevel()
+        window.title(file_path)
+        text = tkinter.Text(window)
+        text.pack()
 
-    # # Mostrar el contenido de manera adecuada usando el módulo ast
-    #     for node in ast.walk(parsed_content):
-    #         if isinstance(node, ast.Expr):
-    #             text.insert(tkinter.END, f"{ast.dump(node)}\n")
+    # Mostrar el contenido de manera adecuada usando el módulo ast
+        for node in ast.walk(parsed_content):
+            if isinstance(node, ast.Expr):
+                text.insert(tkinter.END, f"{ast.dump(node)}\n")
 
     else:
         # Tipo de archivo no compatible
@@ -221,7 +228,7 @@ msg.config(highlightbackground="grey", state="disabled")
 msg.bind("<Return>", (lambda event: client_send(msg.get("1.0", tkinter.END))))
 upload_button = tkinter.Button(bottomFrame, text="Subir archivo",bg='green',command=(lambda: upload_file(bottomFrame)))
 upload_button.pack(side=tkinter.LEFT)
-button2 = tkinter.Button(text="Browse",bg='blue',command=(lambda: view_file(bottomFrame)))
+button2 = tkinter.Button(text="Ver Archivo",bg='blue',command=(lambda: view_file(bottomFrame)))
 button2.pack(side=tkinter.LEFT)
 bottomFrame.pack(side=tkinter.BOTTOM, padx=5)
 

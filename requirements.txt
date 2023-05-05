@@ -1,1 +1,5 @@
 tk
+tkinter
+pillow
+pypdf2
+ast
