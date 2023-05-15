@@ -12,10 +12,25 @@
     ```
     cd FinalComputacion2
     ```
+- Instalr Tkinter (Interfaz Gráfica)
+
+    ```
+    sudo apt-get update
+    
+    ```
+    sudo apt-get upgrade
+    
+    ```
+    ```
+    sudo apt-get update
+    
+    ```
+    sudo apt-get install python3-tk
+    
+    ```
 
 - Instalar dependencias
     ```
-    pip install -r requirements.txt
     pip3 install -r requirements.txt
     
     ```
@@ -24,11 +39,23 @@
 
     Servidor
     ```
-    python3 server.py -p 5000
+    python3 server.py
 
     ```
     Cliente
     ```
-    python3 client.py -p 5000
+    python3 client.py
+
+    ```
+- Argumentos 
+
+    Puerto
+    ```
+    -p 3000
+
+    ```
+    Host - IPv4 / IPv6
+    ```
+    -i 127.0.0.1 / ::1
 
     ```

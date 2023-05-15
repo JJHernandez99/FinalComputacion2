@@ -1,45 +1,50 @@
 import socket, threading
 from argumentos import parser
 import tkinter 
-from tkinter import filedialog
+from tkinter import filedialog, ttk
+from ttkthemes import ThemedTk
 import os
 import tkinter.messagebox
 from PIL import Image, ImageTk
-import PyPDF2
-import ast
+from docx import Document
 
 # Conexion Cliente
 client = None
 args=parser()
 port=args.port
-name = args.name
-ipv6 = '::1'
-ipv4 = '127.0.0.1'
+# name = args.name
+ip = args.ip
 
 def connect_to_server(name):
-    global client, port
+    global client, port, ip
+
     try:
-        # primero intenta conectarse con IPv6
-        client = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        client_ipv6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        client_ipv6.connect((ip, port))
+        print('Conexión exitosa a través de IPv6')
+        client = client_ipv6  # Utiliza el socket IPv6 para la conexión
+    except:
+        print('No se pudo conectar a través de IPv6')
+
         try:
-            client.connect((ipv6, port))
+            client_ipv4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_ipv4.connect((ip, port))
+            print('Conexión exitosa a través de IPv4')
+            client = client_ipv4  # Utiliza el socket IPv4 para la conexión
         except:
-            # si falla, intenta conectarse con IPv4
-            client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client.connect((ipv4, port))
-        
-        client.send(name.encode()) # Enviar nombre de usuario al servidor después de conectar
+            tkinter.messagebox.showerror(title="ERROR!!!", message="No se pudo conectar con el servidor")
+            return
 
-        name_user.config(state=tkinter.DISABLED)
-        button_connect.config(state=tkinter.DISABLED)
-        msg.config(state=tkinter.NORMAL)
+    client.send(name.encode()) # Enviar nombre de usuario al servidor después de conectar
 
-        #Creo Hilos y lo lanzo
-        thread = threading.Thread(target=client_receive, args=(client,"m")) ## REVISAR
-        thread.start()
+    name_user.config(state=tkinter.DISABLED)
+    button_connect.config(state=tkinter.DISABLED)
+    msg.config(state=tkinter.NORMAL)
 
-    except Exception as e:
-        tkinter.messagebox.showerror(title="ERROR!!!", message="Servidor inaccesible")
+    # Creo hilos y lo lanzo
+    thread = threading.Thread(target=client_receive, args=(client,"m"))
+    thread.start()
+
 
 #Conexion con el servidor
 def connect():
@@ -50,7 +55,7 @@ def connect():
         username = name_user.get()
         connect_to_server(username)
 
-#Cargar archivos y leerlo ## REVISAR
+#Cargar archivos y leerlo
 def upload_file(frame):
     file = filedialog.askopenfile(parent=frame,mode='rb',title='Choose a file')
     if file != None:
@@ -112,49 +117,17 @@ def view_file(frame):
         label.image = photo
         label.pack()
 
-    elif file_extension.lower() == '.pdf':
-        pdf_file = open(file_path, 'rb')
-        pdf_reader = PyPDF2.PdfFileReader(pdf_file)
-        page = pdf_reader.getPage(0)
-        width, height = int(page.cropBox.getWidth()), int(page.cropBox.getHeight())
-        image = page.cropBox
-        photo = ImageTk.PhotoImage(image)
-
-        # Crear una nueva ventana para mostrar el archivo PDF
-        window = tkinter.Toplevel()
-        window.title(file_path)
-        canvas = tkinter.Canvas(window, width=width, height=height)
-        canvas.pack()
-        canvas.create_image(0, 0, anchor='nw', image=photo)
-    
-    elif file_extension.lower() == '.sql':
-        with open(file_path, 'r') as file:
-            content = file.read()
-        # Crear una nueva ventana para mostrar el contenido del archivo
-        window = tkinter.Toplevel()
-        window.title(file_path)
-        text = tkinter.Text(window)
-        text.pack()
-        text.insert(tkinter.END, content)
-        
-    elif file_extension.lower() == '.py':
-        with open(file_path, 'r') as file:
-            content = file.read()
-
-        # Parsear el contenido del archivo usando el módulo ast
-        parsed_content = ast.parse(content)
+    elif file_extension.lower() == '.doc' or file_extension.lower() == '.docx':
+        doc = Document(file_path)
+        content = [paragraph.text for paragraph in doc.paragraphs]
 
         # Crear una nueva ventana para mostrar el contenido del archivo
         window = tkinter.Toplevel()
         window.title(file_path)
         text = tkinter.Text(window)
         text.pack()
-
-    # Mostrar el contenido de manera adecuada usando el módulo ast
-        for node in ast.walk(parsed_content):
-            if isinstance(node, ast.Expr):
-                text.insert(tkinter.END, f"{ast.dump(node)}\n")
-
+        for paragraph in content:
+            text.insert(tkinter.END, paragraph + '\n')
     else:
         # Tipo de archivo no compatible
         print(f"Tipo de archivo no compatible: {file_extension}")
@@ -185,50 +158,57 @@ def send_message(message):
     client_msg = str(message)
     client.send(client_msg.encode())
             
-#Enviar archivos al server ##REVISAR
+#Enviar archivos al server
 def send_file(file,file_name):
     client.send("Bytes: {} {}".format(len(file) ,file_name).encode())
     client.send(file)
-    client.send("termino".encode())
+    size_info = "Archivo enviado: {} ({} bytes)".format(file_name, len(file))
+    client.send(size_info.encode())    
     print("Se envio al server el archivo")
 
-#FRONT-END CLIENTE
 #Ventana cliente
-screen_cliente = tkinter.Tk()
+screen_cliente = ThemedTk(theme="arc")
 screen_cliente.title("Cliente")
 username = " "
-screen_cliente.configure(bg='#044f75')
+screen_cliente.configure(bg='#f0f0f0')
+
+# Configuración de estilo para ttk widgets
+style = ttk.Style()
+style.configure("TButton", foreground="#000", background="#90AFC5", font=("Arial", 12))
+style.configure("TEntry", foreground="#000", background="#ffffff", font=("Arial", 12))
 
 #Ventana superior para ingresar nombre de usuario y conectarse al server
-frame_user = tkinter.Frame(screen_cliente, bg='#044f75')
-label_name = tkinter.Label(frame_user, text = "Nombre de usuario:", bg='#044f75').pack(side=tkinter.LEFT)
-name_user = tkinter.Entry(frame_user, bg='#ffffff')
-name_user.pack(side=tkinter.LEFT)
-button_connect = tkinter.Button(frame_user, text="Conectarse", bg='#415d6b', padx=10, command=lambda : connect())
-button_connect.pack(side=tkinter.LEFT)
-frame_user.pack(side=tkinter.TOP)
+frame_user = ttk.Frame(screen_cliente)
+label_name = ttk.Label(frame_user, text = "Nombre de usuario:", font=("Arial", 12))
+label_name.pack(side=tkinter.LEFT, padx=5, pady=5)
+name_user = ttk.Entry(frame_user, width=20)
+name_user.pack(side=tkinter.LEFT, padx=5)
+button_connect = ttk.Button(frame_user, text="Conectarse", command=lambda : connect())
+button_connect.pack(side=tkinter.LEFT, padx=5)
+frame_user.pack(side=tkinter.TOP, pady=10)
 
 #Ventana Chat
-screen_chat = tkinter.Frame(screen_cliente, bg='#044f75')
-label_title = tkinter.Label(screen_chat, text="CHAT", bg='#044f75').pack()
-scroll = tkinter.Scrollbar(screen_chat, bg='#415d6b')
+screen_chat = ttk.Frame(screen_cliente)
+label_title = ttk.Label(screen_chat, text="CHAT", font=("Helvetica", 16, "bold"))
+label_title.pack(pady=5)
+scroll = ttk.Scrollbar(screen_chat)
 scroll.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-chat = tkinter.Text(screen_chat, height=35, width=50)
-chat.pack()
-chat.tag_config("mensaje")
+chat = tkinter.Text(screen_chat, height=35, width=50, font=("Arial", 12), bg='#ECECEC')
+chat.pack(pady=5)
+chat.tag_config("mensaje", font=("Arial", 12))
 scroll.config(command=chat.yview)
-chat.config(yscrollcommand=scroll.set, background="#F4F6F7", highlightbackground="blue", state="disabled")
-screen_chat.pack(side=tkinter.TOP)
+chat.config(yscrollcommand=scroll.set, highlightbackground="blue", state="disabled")
+screen_chat.pack(side=tkinter.TOP, pady=10)
 
 #Ventana para enviar mensajes y archivos
-bottomFrame = tkinter.Frame(screen_cliente, bg='#415d6b')
+bottomFrame = tkinter.Frame(screen_cliente, bg='#ECECEC')
 msg = tkinter.Text(bottomFrame, height=2, width=30)
 msg.pack(side=tkinter.LEFT)
 msg.config(highlightbackground="grey", state="disabled")
 msg.bind("<Return>", (lambda event: client_send(msg.get("1.0", tkinter.END))))
-upload_button = tkinter.Button(bottomFrame, text="Subir archivo",bg='green',command=(lambda: upload_file(bottomFrame)))
+upload_button = tkinter.Button(bottomFrame, text="Enviar archivo",bg='#ECECEC',command=(lambda: upload_file(bottomFrame)))
 upload_button.pack(side=tkinter.LEFT)
-button2 = tkinter.Button(text="Ver Archivo",bg='blue',command=(lambda: view_file(bottomFrame)))
+button2 = tkinter.Button(text="Ver Archivo",bg='#ECECEC',command=(lambda: view_file(bottomFrame)))
 button2.pack(side=tkinter.LEFT)
 bottomFrame.pack(side=tkinter.BOTTOM, padx=5)
 
@@ -237,6 +217,7 @@ def cerrar_ventana():
     respuesta = tkinter.messagebox.askyesno("Salir", "¿Realmente desea salir?")
     if respuesta == True:
         screen_cliente.destroy()
+        os._exit(0)
 
 # Configurar el botón de cierre de la ventana
 screen_cliente.protocol("WM_DELETE_WINDOW", cerrar_ventana)

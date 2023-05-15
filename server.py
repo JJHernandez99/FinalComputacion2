@@ -1,50 +1,56 @@
-import socket,threading
 from argumentos import parser
+from tkinter import messagebox, ttk
+from ttkthemes import ThemedTk
+from multiprocessing import Process, Queue
 import tkinter 
-from tkinter import messagebox
 import os
+import socket,threading
 import logging
-import multiprocessing 
 
+#FRONT-END SERVER
+#Ventana servidor
+screen_servidor = ThemedTk(theme="arc")
+screen_servidor.title("Server")
+screen_servidor.configure(bg='#f0f0f0')
+
+# Configuración de estilo para ttk widgets
+style = ttk.Style()
+style.configure("TButton", foreground="#000", background="#90AFC5", font=("Arial", 12))
+
+#Ventana superior para conectarse al servidor
+frame = ttk.Frame(screen_servidor)
+button_connect = ttk.Button(frame, text="Conectarse", command=lambda : start_server())
+button_connect.pack(side=tkinter.LEFT, padx=5)
+button_stop = ttk.Button(frame, text="Stop", command=lambda : stop_server(), state=tkinter.DISABLED)
+button_stop.pack(side=tkinter.LEFT, padx=5)
+frame.pack(side=tkinter.TOP, pady=(10, 0))
+
+#Etiqueta para mostrar host y puerto del servidor
+frame_connection = ttk.Frame(screen_servidor)
+label_host = ttk.Label(frame_connection, text = "Host: ", font=('Arial', 14))
+label_host.pack(side=tkinter.LEFT, padx=5)
+label_port = ttk.Label(frame_connection, text = "Puerto: ", font=('Arial', 14))
+label_port.pack(side=tkinter.LEFT, padx=5)
+frame_connection.pack(side=tkinter.TOP, pady=(10, 0))
+
+# Ventana de clientes conectados al servidor
+clientFrame = ttk.Frame(screen_servidor)
+label_users = ttk.Label(clientFrame, text="Lista de usuarios conectados", font=('Arial', 18))
+label_users.pack(pady=5)
+lista = tkinter.Text(clientFrame, height=20, width=35, bg='#ECECEC')
+lista.pack(pady=5)
+lista.config(highlightbackground="#90AFC5", state="disabled")
+clientFrame.pack(side=tkinter.BOTTOM, pady=(10, 20))
+
+#Declaracion de variables
 server = None
 args=parser()
-host_4 = '127.0.0.1'
-host_6 = '::1'
 port = args.port
 clients_name = " "
 clients = []
 users = []
 validated_users = []
-
-#FRONT-END SERVER
-#Ventana servidor
-screen_servidor = tkinter.Tk()
-screen_servidor.title("Server")
-screen_servidor.configure(bg='#044f75')
-
-#Ventana superior para conectarse al servidor
-frame = tkinter.Frame(screen_servidor)
-button_connect = tkinter.Button(frame, text="Conectarse", bg='#415d6b', command=lambda : start_server())
-button_connect.pack(side=tkinter.LEFT)
-button_stop = tkinter.Button(frame, text="Stop", bg='#415d6b', command=lambda : stop_server(), state=tkinter.DISABLED)
-button_stop.pack(side=tkinter.LEFT)
-frame.pack(side=tkinter.TOP, pady=(5, 0))
-
-#Etiqueta para mostrar host y puerto del servidor
-frame_connection = tkinter.Frame(screen_servidor, bg='#044f75')
-label_host = tkinter.Label(frame_connection, text = "Host: ", bg='#044f75', font=('Arial', 14))
-label_host.pack(side=tkinter.LEFT)
-label_port = tkinter.Label(frame_connection, text = "Puerto: ", bg='#044f75', font=('Arial', 14))
-label_port.pack(side=tkinter.LEFT)
-frame_connection.pack(side=tkinter.TOP, pady=(5, 0))
-
-# Ventana de clientes conectados al servidor
-clientFrame = tkinter.Frame(screen_servidor, bg='#044f75')
-label_users = tkinter.Label(clientFrame, text="Lista de usuarios conectados", bg='#044f75', font=('Arial', 18)).pack()
-lista = tkinter.Text(clientFrame, height=20, width=35)
-lista.pack()
-lista.config(background="#FFFFFF", highlightbackground="#044f75", state="disabled")
-clientFrame.pack(side=tkinter.BOTTOM, pady=(10, 20))
+server_socket = None
 
 #Mutex para el manejo de log de clientes / conexiones 
 def control_log():
@@ -65,8 +71,9 @@ def control_log():
 
 lock_acceso_archivo_log = threading.Lock() #Se crea el bloqueo
 
+# Función para validar el nombre de usuario
 def validate_username(name):
-    usuarios_permitidos_path = "/home/jhernandez/Documentos/Universidad/FinalComputacion2/users.txt"
+    usuarios_permitidos_path = os.path.dirname(__file__)+"/users.txt"
     if not os.path.isfile(usuarios_permitidos_path):
         return False
 
@@ -78,70 +85,60 @@ def validate_username(name):
 
     return True
 
-# función para validar el usuario a través de un proceso separado
-def validate_username_process(name, result_queue):
-    result_queue.put(validate_username(name))
+# Función que ejecuta el proceso de validación de usuario de forma continua
+def validate_username_process(result_queue):
+    while True:
+        username = result_queue.get()  # Esperar a recibir un nombre de usuario
+        result = validate_username(username)
+        result_queue.put(result)  # Devolver el resultado de la validación
 
 #Funcion para arrancar el servidor
 def start_server():
+    global server_socket
     button_connect.config(state=tkinter.DISABLED)
     button_stop.config(state=tkinter.NORMAL)
-
-    # crear una cola compartida para pasar los resultados de validación del nombre de usuario
-    result_queue = multiprocessing.Queue()
     
-    # crear un proceso para validar los usuarios permitidos
-    usuarios_permitidos_process = multiprocessing.Process(target=validate_username_process)
+    # cola compartida para pasar los nombres de usuario a validar y recibir los resultados
+    result_queue = Queue()
+
+    # proceso para validar los usuarios permitidos
+    usuarios_permitidos_process = Process(target=validate_username_process, args=(result_queue,))
     usuarios_permitidos_process.start()
 
     print("PROCESO CORRIENDO VALIDACION - start server funcion")
     print(result_queue)
 
-   # Crear sockets para IPv4 e IPv6
-    server_ipv4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_ipv6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    # Crear sockets para IPv4 e IPv6
+    server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     # Enlazar y escuchar en ambos sockets
-    server_ipv4.bind((host_4, port))
-    server_ipv6.bind((host_6, port))
-    server_ipv4.listen()
-    server_ipv6.listen()
+    server_socket.bind(('::', port))
+    server_socket.listen()
 
     # Crear hilos para aceptar clientes en ambos sockets
-    thread_ipv4 = threading.Thread(target=accept_clients, args=(server_ipv4," ",result_queue))
-    thread_ipv4.start()
+    thread_server= threading.Thread(target=accept_clients, args=(server_socket," ",result_queue))
+    thread_server.start()
 
-    thread_ipv6 = threading.Thread(target=accept_clients, args=(server_ipv6," ",result_queue))
-    thread_ipv6.start()
-
-    label_host["text"] = "Host: " + host_4
+    label_host["text"] = "Host: IPv4 / IPv6"
     label_port["text"] = "Port: " + str(port)
 
     #Log de arranque de servidor 
     hilo = threading.Thread(target=control_log, name='"---------- Servidor corriendo ----------"')
     hilo.start()
 
-#Funcion para parar servidor
-def stop_server():
-    global server
-    button_connect.config(state=tkinter.NORMAL)
-    hilo = threading.Thread(target=control_log, name='"---------- Se paro el servidor----------"')
-    hilo.start()
-    button_stop.config(state=tkinter.DISABLED)
-
 #Funcion para aceptar las conexiones de los clientes
-def accept_clients(the_server, y,result_queue):
+def accept_clients(server_socket,y,result_queue):
      while True:
-        client, addr = the_server.accept()
+        client, addr = server_socket.accept()
 
         username = client.recv(4096).decode() #Tomo el nombre del usuario que ingresa
-        result_queue = multiprocessing.Queue()
-        process = multiprocessing.Process(target=validate_username_process, args=(username, result_queue))
-        process.start()
-        print("PROCESO CORRIENDO VALIDACION - aceptar cliente funcion")
-        print(result_queue)
-        process.join()
+        
+        # Enviar el nombre de usuario a través de la cola para validar
+        result_queue.put(username)
 
+        # Esperar el resultado de la validación
         if not result_queue.get():
             error_msg = "Usuario no permitido. Desconectando..."
             client.send(error_msg.encode())
@@ -158,7 +155,7 @@ def accept_clients(the_server, y,result_queue):
         thread.start()
 
         #Log nuevo cliente 
-        hilo = threading.Thread(target=control_log, name=f'"---- Se conecto un nuevo cliente al serivdor: {username} ---------"')
+        hilo = threading.Thread(target=control_log, name=f'"---- Se conecto un nuevo cliente al serivdor: {username} - IP: {addr} ---------"')
         hilo.start()
 
 # Función para recibir mensaje del cliente actual y enviar ese mensaje a otros clientes
@@ -176,12 +173,13 @@ def handle_client(client_connection, addr, username):
     #Recorre en bloques 
     while True:
         try:
-            data = client_connection.recv(500000).decode()
+            data = client_connection.recv(4096).decode()
         except UnicodeDecodeError as eror:
             data = ""
-        if not data: break
+              
         if data == "/exit":
-            print("Salio el usuario con exito")
+
+            client_connection.close()
             # Elimina el hilo del cliente
             for thread in threading.enumerate():
                 if thread.name == f'Thread for {username}':
@@ -197,9 +195,7 @@ def handle_client(client_connection, addr, username):
             server_msg = "Usuarios conectados: " + connected_clients
             client_connection.send(server_msg.encode())
 
-        if not validated:
-            break
-            
+                   
         client_msg = data
 
         if client_msg.startswith("Bytes:") :
@@ -207,10 +203,20 @@ def handle_client(client_connection, addr, username):
             size = int(file_data[1])
             print("Se recibio un archivo con bytes " + file_data[1] + " con nombre: " + file_data[2])
 
-            file_buffer = client_connection.recv(size)
+            # Recibe el archivo en bloques de 4096 bytes
+            file_buffer = b""
+            remaining_bytes = size
+            while remaining_bytes > 0:
+                if remaining_bytes >= 4096:
+                    block = client_connection.recv(4096)
+                else:
+                    block = client_connection.recv(remaining_bytes)
+                file_buffer += block
+                remaining_bytes -= len(block)
+
             save_file(file_buffer, file_data[2])
-            data = client_connection.recv(4096).decode()
-            client_connection.send("Archivo enviado".encode())
+            client_connection.send("-> Archivo enviado".encode())
+            continue
 
         index = get_client(clients, client_connection)
         sending_client_name = users[index]
@@ -229,11 +235,7 @@ def handle_client(client_connection, addr, username):
     index = get_client(clients, client_connection)
     del users[index] #Elimino el cliente del server
     del clients[index] #Elimino el cliente de la conexion
-    server_msg = "BYE!"
-   
-    client_connection.send(server_msg.encode())
-    client_connection.close()
-
+    del validated_users[index]
     update_list(users)  #Actualizar nombre de usuarios en pantalla
 
 #Devuelve el índice del cliente actual en la lista de clientes
@@ -262,6 +264,15 @@ def save_file(data, name):
     f.write(data_b)
     f.close()
 
-
+def stop_server():
+    global server_socket
+    button_connect.config(state=tkinter.NORMAL)
+    hilo = threading.Thread(target=control_log, name='"---------- Se paro el servidor----------"')
+    hilo.start()
+    button_stop.config(state=tkinter.DISABLED)
+    if server_socket:
+        server_socket.close()
+    screen_servidor.destroy()
+    os._exit(0)
 
 screen_servidor.mainloop()
