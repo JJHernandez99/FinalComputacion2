@@ -27,7 +27,11 @@ El servidor solicita el nombre de usuario cuando el usuario desea unirse a la sa
 
 ### Principal
 
-![Diagram-Principal](https://user-images.githubusercontent.com/48955519/222277237-5d543260-c96c-45e7-af59-87ad9468da6d.png)
+![Diagram-Principal](https://user-images.githubusercontent.com/48955519/236473705-13192f8c-cafb-48ea-a144-94c4029ec9f8.png)
+
+### Conexión al servidor - Cliente
+
+![Diagram-Connet-to-Server](https://user-images.githubusercontent.com/48955519/236473976-b19f2eca-8218-406c-831a-00735d7765ae.png)
 
 ### Manejo de Sockets
 
